@@ -1,0 +1,4 @@
+/.idea
+nohup.out
+app.yaml
+*.log
