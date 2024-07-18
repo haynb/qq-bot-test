@@ -26,7 +26,7 @@ func CommonRequest(path string, jsonData []byte) ([]byte, error) {
 	logs.Logger.Infof("CommonRequest body: %s", string(jsonData))
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
-		fmt.Println("Error creating request:", err)
+		logs.Logger.Errorf("Error creating request: %v", err)
 		return nil, err
 	}
 
@@ -39,7 +39,7 @@ func CommonRequest(path string, jsonData []byte) ([]byte, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Error sending request:", err)
+		logs.Logger.Errorf("Error sending request: %v", err)
 		return nil, err
 	}
 	defer resp.Body.Close()

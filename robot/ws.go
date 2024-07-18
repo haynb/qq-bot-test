@@ -177,28 +177,28 @@ func (ws *Wss) ReadMsg() (messageType int, p []byte, err error) {
 }
 
 func (ws *Wss) StartSvc() {
-	err := Ws.StartWss()
+	err := ws.StartWss()
 	if err != nil {
 		log.Fatal("dial:", err)
 	}
 	// 接收 Hello 消息并发送鉴权
-	_, message, err := Ws.ReadMsg()
+	_, message, err := ws.ReadMsg()
 	if err != nil {
 		log.Fatal("read:", err)
 	}
 	var helloPayload Payload
 	json.Unmarshal(message, &helloPayload)
-	Ws.Identify(GetAppToken().AccessToken)
+	ws.Identify(GetAppToken().AccessToken)
 	heartbeatInterval := time.Duration(helloPayload.D.(map[string]interface{})["heartbeat_interval"].(float64)) * time.Millisecond
-	Ws.heartbeatManager = Ws.NewHeartbeatManager(heartbeatInterval)
-	Ws.StartHeartbeat()
+	ws.heartbeatManager = ws.NewHeartbeatManager(heartbeatInterval)
+	ws.StartHeartbeat()
 	// 处理消息
 	for {
-		_, message, err := Ws.ReadMsg()
+		_, message, err := ws.ReadMsg()
 		if err != nil {
 			logs.Logger.Errorf("read error: %v", err)
-			Ws.CloseWss()
-			err = Ws.Resume(GetAppToken().AccessToken)
+			ws.CloseWss()
+			err = ws.Resume(GetAppToken().AccessToken)
 			if err != nil {
 				logs.Logger.Println("Failed to resume connection, exiting")
 				break
@@ -218,7 +218,7 @@ func (ws *Wss) StartSvc() {
 					logs.Logger.Printf("Error asserting type for payload data")
 					break
 				}
-				Ws.sessionId, ok = dataMap["session_id"].(string) // 再次使用类型断言提取session_id
+				ws.sessionId, ok = dataMap["session_id"].(string) // 再次使用类型断言提取session_id
 				if !ok {
 					logs.Logger.Printf("Error asserting type for session_id")
 					break
@@ -233,12 +233,12 @@ func (ws *Wss) StartSvc() {
 				}
 				Replay(dataMap)
 			}
-			Ws.lastSequenceNumber = payload.S // 更新序列
+			ws.lastSequenceNumber = payload.S // 更新序列
 		case 11:
 			logs.Logger.Printf("Received HEARTBEAT_ACK message: %+v", payload)
 		}
 	}
-	Ws.StopHeartbeat()
-	Ws.c.Close()
+	ws.StopHeartbeat()
+	ws.c.Close()
 	logs.Logger.Println("Connection closed")
 }

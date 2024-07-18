@@ -42,7 +42,7 @@ func InitToken() {
 	// 读取响应数据
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error reading response body:", err)
+		logs.Logger.Errorf("Error reading response body: %v", err)
 		return
 	}
 	if resp.StatusCode != http.StatusOK {
@@ -50,14 +50,14 @@ func InitToken() {
 		return
 	}
 	if err := json.Unmarshal(body, &appToken); err != nil {
-		fmt.Println("Error unmarshalling success response:", err)
+		logs.Logger.Errorf("Error unmarshalling success response: %v", err)
 		return
 	}
 	logs.Logger.Infof("Get token success: %v . ExpireTime: %v", appToken, appToken.ExpireTime)
 	// 设置定时任务，提前一分钟刷新 token
 	expireSeconds, err := strconv.Atoi(appToken.ExpireTime)
 	if err != nil {
-		fmt.Println("Error parsing ExpireTime:", err)
+		logs.Logger.Errorf("Error parsing ExpireTime: %v", err)
 		return
 	}
 	// 将秒数转换为 time.Duration
